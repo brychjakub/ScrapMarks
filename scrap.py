@@ -1,3 +1,5 @@
+import asyncio
+
 from playwright.sync_api import Playwright, sync_playwright
 import getpass
 
@@ -42,6 +44,7 @@ with sync_playwright() as playwright:
 
     page.wait_for_load_state("networkidle")
 
+    #tlačítko "hodnocení"
     evaluation_selector = "#lid221"
 
     page.click(evaluation_selector)
@@ -55,9 +58,25 @@ with sync_playwright() as playwright:
 
     first_id = page.query_selector('button:has-text("Microsoft")')
 
-    element = page.locator('.r_selected')
-    text = element.inner_text()
-    print(text)
+    #class= combobox_in
+    #getting the ID of "aktivní kurzy"
+    active_courses = page.locator('li:has-text("Ajk - 8.A 8.B")')
+    element_id = active_courses.get_attribute('id')
+    print(element_id)
+
+    active_courses.click()
+
+    page.wait_for_load_state("networkidle")
+
+    #clicking 3 dots to rollout option to download excel file
+    choices = page.locator('a[title="Volby"]')
+    choices.click()
+
+    page.wait_for_load_state("networkidle")
+
+    link = page.locator('a[title="Exportovat do Excelu"]')
+    link.click()
+   
 
     page.screenshot(path="example.png")
     browser.close()

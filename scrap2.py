@@ -1,15 +1,52 @@
 from playwright.sync_api import Playwright, sync_playwright
 import getpass
-import time
 
-#password = getpass.getpass("Enter your password: ")
+email = input("Enter your email: ")
+password = getpass.getpass("Enter your password: ")
+
+def download_excel(page):
+    choices_selector = 'a[title="Volby"]'
+    excel_export_selector = 'a[title="Exportovat do Excelu"]'
+
+    page.wait_for_selector(choices_selector).click()
+    page.wait_for_selector(excel_export_selector).click()
 
 
+def choose_course(page):
+    button_selector3 = "input[name='course_id']"
+    page.wait_for_selector(button_selector3).click()
 
+    first_id = page.locator('li:has-text("-- AKTIVNÍ KURZY ---")')
+    last_id = page.locator('li:has-text("-- SUPLOVANÉ A NEZAPSANÉ KURZY --")')
+
+    start = int(''.join(filter(str.isdigit, first_id.get_attribute('id'))))
+    end = int(''.join(filter(str.isdigit, last_id.get_attribute('id'))))
+
+    for i in range(start + 1, end+1):
+        id = "cbr_" + str(i)
+        print(id)
+
+        button_selector3 = "input[name='course_id']"
+        page.wait_for_selector(button_selector3).click()
+
+        page.wait_for_load_state("networkidle")
+        
+        course = page.locator(f'li[id="{id}"]')
+        course.click()
+        id2 = "cbr_" + str(i-1)
+        if id2 != "cbr_1":
+            
+            name = page.locator(f'li[id="{id2}"]').inner_text()
+
+            download_excel(page)
+            with page.expect_download() as download_info:
+                download = download_info.value
+                download.save_as(f".\{name}.xlsx") 
+        else:
+            continue
 
 def main():
     with sync_playwright() as playwright:
-        # Your code here
         browser = playwright.chromium.launch()
         context = browser.new_context()
         page = context.new_page()
@@ -19,13 +56,11 @@ def main():
         page.wait_for_load_state("networkidle")
         button = page.query_selector('button:has-text("Microsoft")')
         button.click()
-
         # Wait for the page to fully load
         page.wait_for_load_state("networkidle")
 
-       
         email_selector = "input[type='email']"
-        page.fill(email_selector, "brych@cmczs.cz")
+        page.fill(email_selector, f"{email}")
 
         page.wait_for_load_state("networkidle")
 
@@ -35,9 +70,7 @@ def main():
         page.wait_for_load_state("networkidle")
 
         password_selector = "input[type='password']"
-        page.fill(password_selector, "Iphone4S")
-
-        sign_in_button_selector = "input[type='submit']"
+        page.fill(password_selector, f"{password}")
         page.click(sign_in_button_selector)
 
         page.wait_for_load_state("networkidle")
@@ -47,45 +80,10 @@ def main():
 
         page.wait_for_load_state("networkidle")
 
-        #tlačítko "hodnocení"
         evaluation_selector = "#lid221"
-
         page.click(evaluation_selector)
-
-        page.wait_for_load_state("networkidle")
-
-        button_selector3 = "input[name='course_id']"
-        page.click(button_selector3)
-
-        page.wait_for_load_state("networkidle")
-
-
-        #class= combobox_in
-        #getting the ID of "aktivní kurzy"
-        active_courses = page.locator('li:has-text("Ajk - 8.A 8.B")')
-        element_id = active_courses.get_attribute('id')
-        print(element_id)
-
-        active_courses.click()
-
-        page.wait_for_load_state("networkidle")
-
-        #clicking 3 dots to rollout option to download excel file
-        choices = page.locator('a[title="Volby"]')
-        choices.click()
-
-        page.wait_for_load_state("networkidle")
-        
-        link = page.locator('a[title="Exportovat do Excelu"]')
-        href = link.get_attribute("href")
-
-        link.click()
-
-        # Wait for the download to start
-        with page.expect_download() as download_info:
-            download = download_info.value
-        # Wait for the download process to complete
-            download.save_as(".\hi.xlsx")       
+   
+        choose_course(page)
 
         context.close()
         browser.close()
@@ -93,3 +91,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+    

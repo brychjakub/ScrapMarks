@@ -1,4 +1,7 @@
 from playwright.sync_api import Playwright, sync_playwright
+import getpass
+
+password = getpass.getpass("Enter your password: ")
 
 with sync_playwright() as playwright:
     # Your code here
@@ -27,7 +30,7 @@ with sync_playwright() as playwright:
     page.wait_for_load_state("networkidle")
 
     password_selector = "input[type='password']"
-    page.fill(password_selector, "************")
+    page.fill(password_selector, f"{password}")
 
     sign_in_button_selector = "input[type='submit']"
     page.click(sign_in_button_selector)

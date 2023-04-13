@@ -1,12 +1,14 @@
 from playwright.sync_api import Playwright, sync_playwright
 import getpass
+import time
 
-password = getpass.getpass("Enter your password: ")
+#password = getpass.getpass("Enter your password: ")
 
 with sync_playwright() as playwright:
     # Your code here
     browser = playwright.chromium.launch()
-    page = browser.new_page()
+    context = browser.new_context()
+    page = context.new_page()
     page.goto("https://cmczs-login.edookit.net/")
     button_selector = "#plus4ULoginButton"
     page.click(button_selector)
@@ -16,6 +18,9 @@ with sync_playwright() as playwright:
 
     # Wait for the page to fully load
     page.wait_for_load_state("networkidle")
+
+    # Add a 5-second delay before filling in the email field
+    time.sleep(5)
 
     email_selector = "input[type='email']"
     page.fill(email_selector, "brych@cmczs.cz")
@@ -28,7 +33,7 @@ with sync_playwright() as playwright:
     page.wait_for_load_state("networkidle")
 
     password_selector = "input[type='password']"
-    page.fill(password_selector, f"{password}")
+    page.fill(password_selector, "Iphone4S")
 
     sign_in_button_selector = "input[type='submit']"
     page.click(sign_in_button_selector)
@@ -69,11 +74,19 @@ with sync_playwright() as playwright:
     choices.click()
 
     page.wait_for_load_state("networkidle")
-
+    print("before timeout")
+    page.set_default_timeout(30000)  # Set timeout to 30 seconds
+    print("after timeout")
     link = page.locator('a[title="Exportovat do Excelu"]')
-    link.click()
-   
+    href = link.get_attribute("href")
+    print("before href")
+    # Navigate to the link and download the file
+    page.goto(href)
+    print("after href")
+    page.wait_for_load_state("networkidle")
     page.wait_for_download()
 
     page.screenshot(path="example.png")
+
+    context.close()
     browser.close()

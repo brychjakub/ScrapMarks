@@ -1,9 +1,14 @@
 from playwright.sync_api import sync_playwright
 from getpass_asterisk.getpass_asterisk import getpass_asterisk
 import os
+import time
+
 
 email = input("Enter your email: ")
 password = getpass_asterisk("Enter your password: ")
+
+start_time = time.time()
+print("start")
 
 def download_excel(page):
     choices_selector = 'a[title="Volby"]'
@@ -95,3 +100,7 @@ def main():
 if __name__ == '__main__':
     main()
     
+end_time = time.time()
+
+elapsed_time = end_time - start_time
+print(f"Elapsed time: {elapsed_time} seconds")

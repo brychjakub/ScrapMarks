@@ -1,5 +1,6 @@
 from playwright.sync_api import Playwright, sync_playwright
 import getpass
+import os
 
 email = input("Enter your email: ")
 password = getpass.getpass("Enter your password: ")
@@ -38,10 +39,14 @@ def choose_course(page):
             
             name = page.locator(f'li[id="{id2}"]').inner_text()
 
+            newpath = r'.\{}'.format(email)
+            if not os.path.exists(newpath):
+                os.makedirs(newpath)
+
             download_excel(page)
             with page.expect_download() as download_info:
                 download = download_info.value
-                download.save_as(f".\{name}.xlsx") 
+                download.save_as(f".\{email}\{name}.xlsx") 
         else:
             continue
 
@@ -56,11 +61,11 @@ def main():
         page.wait_for_load_state("networkidle")
         button = page.query_selector('button:has-text("Microsoft")')
         button.click()
-        # Wait for the page to fully load
+
         page.wait_for_load_state("networkidle")
 
         email_selector = "input[type='email']"
-        page.fill(email_selector, f"{email}")
+        page.fill(email_selector, f"{email}") 
 
         page.wait_for_load_state("networkidle")
 

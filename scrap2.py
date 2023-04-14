@@ -1,9 +1,14 @@
-from playwright.sync_api import Playwright, sync_playwright
-import getpass
+from playwright.sync_api import sync_playwright
+from getpass_asterisk.getpass_asterisk import getpass_asterisk
 import os
+import time
+
 
 email = input("Enter your email: ")
-password = getpass.getpass("Enter your password: ")
+password = getpass_asterisk("Enter your password: ")
+
+start_time = time.time()
+print("start")
 
 def download_excel(page):
     choices_selector = 'a[title="Volby"]'
@@ -11,6 +16,13 @@ def download_excel(page):
 
     page.wait_for_selector(choices_selector).click()
     page.wait_for_selector(excel_export_selector).click()
+
+
+def make_dir():
+    newpath = r'.\{}'.format(email)
+    if not os.path.exists(newpath):
+        os.makedirs(newpath)
+
 
 
 def choose_course(page):
@@ -35,14 +47,9 @@ def choose_course(page):
         course = page.locator(f'li[id="{id}"]')
         course.click()
         id2 = "cbr_" + str(i-1)
-        if id2 != "cbr_1":
-            
+        if id2 != "cbr_1":           
             name = page.locator(f'li[id="{id2}"]').inner_text()
-
-            newpath = r'.\{}'.format(email)
-            if not os.path.exists(newpath):
-                os.makedirs(newpath)
-
+            make_dir()
             download_excel(page)
             with page.expect_download() as download_info:
                 download = download_info.value
@@ -78,15 +85,11 @@ def main():
         page.fill(password_selector, f"{password}")
         page.click(sign_in_button_selector)
 
-        page.wait_for_load_state("networkidle")
-
         button_selector2 = "input[id='idBtn_Back']"
-        page.click(button_selector2)
-
-        page.wait_for_load_state("networkidle")
+        page.wait_for_selector(button_selector2).click()
 
         evaluation_selector = "#lid221"
-        page.click(evaluation_selector)
+        page.wait_for_selector(evaluation_selector).click()
    
         choose_course(page)
 
@@ -97,3 +100,7 @@ def main():
 if __name__ == '__main__':
     main()
     
+end_time = time.time()
+
+elapsed_time = end_time - start_time
+print(f"Elapsed time: {elapsed_time} seconds")

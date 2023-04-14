@@ -83,10 +83,8 @@ def main():
         button_selector2 = "input[id='idBtn_Back']"
         page.wait_for_selector(button_selector2).click()
 
-        page.wait_for_load_state("networkidle")
-
         evaluation_selector = "#lid221"
-        page.click(evaluation_selector)
+        page.wait_for_selector(evaluation_selector).click()
    
         choose_course(page)
 

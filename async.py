@@ -6,6 +6,8 @@ from getpass_asterisk.getpass_asterisk import getpass_asterisk
 from playwright.async_api import async_playwright
 
 email = input("Enter your email: ")
+password = getpass_asterisk("Enter your password: ")
+
 
 
 async def download_excel(page):
@@ -54,22 +56,10 @@ async def choose_course(page):
         else:
             continue
 
-
-async def main():
-    password = getpass_asterisk("Enter your password: ")
-
-    start_time = time.time()
-    print("start")
-
-    async with async_playwright() as playwright:
-        browser = await playwright.chromium.launch()
-        context = await browser.new_context()
-        page = await context.new_page()
-        await page.goto("https://cmczs-login.edookit.net/")
-        button_selector = "#plus4ULoginButton"
-        await page.click(button_selector)
-        await page.wait_for_load_state("networkidle")
+async def loginMicrosoft(page):
         button = await page.query_selector('button:has-text("Microsoft")')
+        await page.wait_for_load_state("networkidle")
+
         await button.click()
 
         await page.wait_for_load_state("networkidle")
@@ -84,13 +74,35 @@ async def main():
 
         await page.wait_for_load_state("networkidle")
 
-        password_selector = "input[type='password']"
-        await page.fill(password_selector, f"{password}")
-        await page.click(sign_in_button_selector)
+        try:
+            password_selector = "input[type='password']"
+            await page.fill(password_selector, f"{password}")
 
-        button_selector2 = "input[id='idBtn_Back']"
-        await page.click(button_selector2)
+        
+            await page.click(sign_in_button_selector)
+        except:
+          print("Wrong password. Please try again.")
+          return
+        
+        staySingnedButton = "input[id='idBtn_Back']"
+        
+        await page.wait_for_load_state("networkidle")
 
+        await page.click(staySingnedButton)
+
+async def main():
+    start_time = time.time()
+    print("start")
+
+    async with async_playwright() as playwright:
+        browser = await playwright.chromium.launch()
+        context = await browser.new_context()
+        page = await context.new_page()
+        await page.goto("https://cmczs-login.edookit.net/")
+        button_selector = "#plus4ULoginButton"
+        await page.click(button_selector)
+        await page.wait_for_load_state("networkidle")
+        await loginMicrosoft(page)
         evaluation_selector = "#lid221"
         await page.click(evaluation_selector)
 

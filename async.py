@@ -72,23 +72,24 @@ async def loginMicrosoft(page):
         sign_in_button_selector = "input[type='submit']"
         await page.click(sign_in_button_selector)
 
-        await page.wait_for_load_state("networkidle")
+        
+        staySignnedButton = "input[id='idBtn_Back']"
 
-        try:
+        if staySignnedButton == False:
+            passwordAgain = getpass_asterisk("wrong password, try again: ")
             password_selector = "input[type='password']"
-            await page.fill(password_selector, f"{password}")
+            await page.fill(password_selector, f"{passwordAgain}")
+        
+        else:
+            await page.wait_for_load_state("networkidle")
+        
+        await page.click(sign_in_button_selector)
+        await page.click(staySignnedButton)
 
         
-            await page.click(sign_in_button_selector)
-        except:
-          print("Wrong password. Please try again.")
-          return
-        
-        staySingnedButton = "input[id='idBtn_Back']"
         
         await page.wait_for_load_state("networkidle")
 
-        await page.click(staySingnedButton)
 
 async def main():
     start_time = time.time()

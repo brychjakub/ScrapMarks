@@ -115,5 +115,4 @@ async def main():
     elapsed_time = end_time - start_time
     print(f"Elapsed time: {elapsed_time} seconds")
 
-#awating the main function
 asyncio.run(main())

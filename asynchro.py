@@ -107,7 +107,7 @@ async def login(email, password):
         button = await page.query_selector('button:has-text("Microsoft")')
         await button.click()
                 
-
+        
         await page.wait_for_load_state("networkidle")
         email_selector = "input[type='email']"
         await page.fill(email_selector, f"{email}")

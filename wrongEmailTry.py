@@ -115,39 +115,51 @@ async def login(email, password):
         await page.wait_for_load_state("networkidle")
 
         sign_in_button_selector = "input[type='submit']"
+        sign_in = await page.query_selector('button:has-text("Sign in")')
+        await page.screenshot(path=f".\{email}.png")
+        print("trying email") 
+
         await page.click(sign_in_button_selector)
+        await page.wait_for_load_state("networkidle")
+
+
         while True:
             try:
+
                 await page.wait_for_load_state("networkidle")
                 print("checking email")
-                password_selector = "input[type='password']"
+                password_selector = "input[id='i0118']"
                 await page.fill(password_selector, f"{password}")
-                await page.click(sign_in_button_selector)
+                await page.click(sign_in)
                 await page.wait_for_load_state("networkidle")
                 break
-                
+                    
             except:
                 print("wrong email")
                 login_window = LoginWindow()
-                emailAgain = login_window.email  
+                emailAgain = login_window.email 
+                #take screenshot
+                await page.screenshot(path=f".\{emailAgain}.png") 
                 await page.fill(email_selector, f"{emailAgain}")
                 await page.click(sign_in_button_selector)  
+                await page.wait_for_load_state("networkidle")
+
+                        
 
         while True:
             try:
                 await page.wait_for_load_state("networkidle")
                 print("checking password")
-                dontKeepSignIn = "input[id='idBtn_Back']"
+                dontKeepSignIn = await page.query_selector("input[id='idBtn_Back']")
                 await page.click(dontKeepSignIn)
                 break
-
             except:
                 login_window = LoginWindow()
                 passwordAgain = login_window.password
-
                 await page.fill(password_selector, f"{passwordAgain}")
                 await page.click(sign_in_button_selector)
-            
+
+                    
 
         evaluation_selector = "#lid221"
         await page.click(evaluation_selector)

@@ -2,44 +2,52 @@ import asyncio
 import os
 import time
 import customtkinter
-
-from getpass_asterisk.getpass_asterisk import getpass_asterisk
 from playwright.async_api import async_playwright
+import os
+from datetime import datetime
 
 
 class LoginWindow:
+
     def __init__(self):
-        self.email = None
-        self.password = None
-        
-        customtkinter.set_appearance_mode("System")
-        customtkinter.set_default_color_theme("green")
+            self.email = None
+            self.password = None
+            
+            customtkinter.set_appearance_mode("System")
+            customtkinter.set_default_color_theme("green")
 
-        root = customtkinter.CTk()
-        root.geometry("500x350")
+            root = customtkinter.CTk()
+            root.geometry("500x350")
 
-        def login():
-            self.email = entry1.get()
-            self.password = entry2.get()
-            root.destroy()
+            def login():
+                self.email = entry1.get()
+                self.password = entry2.get()
+                root.destroy()
 
-        frame = customtkinter.CTkFrame(master=root)
-        frame.pack(pady=20, padx=60, fill="both", expand=True)
+            def close_window():
+                root.destroy()
 
-        label = customtkinter.CTkLabel(master=frame, text="Login System")
-        label.pack(pady=12, padx=10)
+            frame = customtkinter.CTkFrame(master=root)
+            frame.pack(pady=20, padx=60, fill="both", expand=True)
 
-        entry1 = customtkinter.CTkEntry(master=frame, placeholder_text="Username")
-        entry1.pack(pady=12, padx=10)
+            label = customtkinter.CTkLabel(master=frame, text="Login System")
+            label.pack(pady=12, padx=10)
 
-        entry2 = customtkinter.CTkEntry(master=frame, placeholder_text="Password", show="*")
-        entry2.pack(pady=12, padx=10)
+            entry1 = customtkinter.CTkEntry(master=frame, placeholder_text="Username")
+            entry1.pack(pady=12, padx=10)
 
-        button = customtkinter.CTkButton(master=frame, text="Login", command=login)
-        button.pack(pady=12, padx=10)
-        root.bind('<Return>', lambda event: login())
+            entry2 = customtkinter.CTkEntry(master=frame, placeholder_text="Password", show="*")
+            entry2.pack(pady=12, padx=10)
 
-        root.mainloop()
+            button = customtkinter.CTkButton(master=frame, text="Login", command=login)
+            button.pack(pady=12, padx=10)
+            root.bind('<Return>', lambda event: login())
+
+            
+            root.bind('<Return>', lambda event: login())
+            root.protocol("WM_DELETE_WINDOW", close_window)
+
+            root.mainloop()
 
 async def download_excel(page):
     choices_selector = 'a[title="Volby"]'
@@ -49,10 +57,12 @@ async def download_excel(page):
     await page.click(excel_export_selector)
 
 
-def make_dir():
-    newpath = ".\známky"
+def make_dir(email):
+    today = datetime.today().strftime('%d-%m-%Y')
+    newpath = r".\{} {}".format(email, today)
     if not os.path.exists(newpath):
         os.makedirs(newpath)
+    return newpath
 
 
 async def choose_course(page):
@@ -78,16 +88,18 @@ async def choose_course(page):
         id2 = "cbr_" + str(i - 1)
         if id2 != "cbr_1":
             name = await page.locator(f'li[id="{id2}"]').inner_text()
-            make_dir()
+
+            make_dir(email)
             await download_excel(page)
             async with page.expect_download() as download_info:
                 download = await download_info.value
-                await download.save_as(f".\známky\{name}.xlsx")
+                await download.save_as(f".\{email}\{name}.xlsx")
         else:
             continue
 
 
 async def login():
+    global email
     async with async_playwright() as playwright:
         
         browser = await playwright.chromium.launch()

@@ -112,7 +112,7 @@ async def login():
                     email = login_window.email
                     print(email)
                     password = login_window.password
-                    print(password)                
+                    print("*******")                
                     
                     await page.wait_for_load_state("networkidle")
                     email_selector = "input[type='email']"

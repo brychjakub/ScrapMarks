@@ -1,9 +1,7 @@
 import asyncio
-import os
 import time
 import customtkinter
 from playwright.async_api import async_playwright
-import os
 from datetime import datetime
 
 
@@ -21,7 +19,6 @@ class LoginWindow:
 
             def login():
                 self.email = entry1.get()
-                self.password = entry2.get()
                 root.destroy()
 
             def close_window():
@@ -36,9 +33,7 @@ class LoginWindow:
             entry1 = customtkinter.CTkEntry(master=frame, placeholder_text="Username")
             entry1.pack(pady=12, padx=10)
 
-            entry2 = customtkinter.CTkEntry(master=frame, placeholder_text="Password", show="*")
-            entry2.pack(pady=12, padx=10)
-
+       
             button = customtkinter.CTkButton(master=frame, text="Login", command=login)
             button.pack(pady=12, padx=10)
             root.bind('<Return>', lambda event: login())
@@ -94,13 +89,15 @@ async def choose_course(page):
 async def login():
     global email
     async with async_playwright() as playwright:
+        root = customtkinter.CTk()
+        root.geometry("500x350")
         frame = customtkinter.CTkFrame(master=root)
         frame.pack(pady=20, padx=60, fill="both", expand=True)
 
         entry2 = customtkinter.CTkEntry(master=frame, placeholder_text="Password", show="*")
         entry2.pack(pady=12, padx=10)
         
-        browser = await playwright.chromium.launch()
+        browser = await playwright.chromium.launch(headless=True)
         context = await browser.new_context()
         page = await context.new_page()
         while True:
@@ -116,8 +113,6 @@ async def login():
                     login_window = LoginWindow()
                     email = login_window.email
                     print(email)
-                    password = self.entry2.get()
-                    print('entering password')                    
                     await page.wait_for_load_state("networkidle")
                     email_selector = "input[type='email']"
                     await page.fill(email_selector, f"{email}")
@@ -129,7 +124,7 @@ async def login():
 
                     await page.wait_for_load_state("networkidle")
                     password_selector = "input[type='password']"
-                    await page.fill(password_selector, f"{password}")
+                    await page.fill(password_selector, entry2.get())
                     await page.click(sign_in_button_selector)
                     await page.wait_for_load_state("networkidle")
 

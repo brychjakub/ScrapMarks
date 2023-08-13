@@ -94,6 +94,11 @@ async def choose_course(page):
 async def login():
     global email
     async with async_playwright() as playwright:
+        frame = customtkinter.CTkFrame(master=root)
+        frame.pack(pady=20, padx=60, fill="both", expand=True)
+
+        entry2 = customtkinter.CTkEntry(master=frame, placeholder_text="Password", show="*")
+        entry2.pack(pady=12, padx=10)
         
         browser = await playwright.chromium.launch()
         context = await browser.new_context()
@@ -111,9 +116,8 @@ async def login():
                     login_window = LoginWindow()
                     email = login_window.email
                     print(email)
-                    password = login_window.password
-                    print("*******")                
-                    
+                    password = self.entry2.get()
+                    print('entering password')                    
                     await page.wait_for_load_state("networkidle")
                     email_selector = "input[type='email']"
                     await page.fill(email_selector, f"{email}")

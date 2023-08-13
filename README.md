@@ -1,4 +1,5 @@
 # ScrapMarks
+- *NOT FUNCTIONAL if not part of the organization*
 - done with Playwright
 - reason: need to automate my monthly routine of downloading each classess' grades separatelly
   
